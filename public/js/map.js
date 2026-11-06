@@ -520,6 +520,8 @@ function openReportModal(keepPlacedPin = true) {
   if (!keepPlacedPin) {
     // Reset pin info display if no pin
   }
+  // Close filter panel if open
+  closeFilterPanel();
   const modal = document.getElementById('report-modal');
   const backdrop = document.querySelector('.report-modal-backdrop');
   if (modal) modal.classList.add('open');
@@ -787,6 +789,107 @@ function showMapError(msg) {
   document.body.appendChild(banner);
 }
 
+/* ── Filter button + panel ───────────────────────────────────── */
+function closeFilterPanel() {
+  const panel    = document.getElementById('filter-panel');
+  const btn      = document.getElementById('filter-toggle-btn');
+  const backdrop = document.getElementById('filter-backdrop');
+  if (!panel) return;
+  panel.hidden   = true;
+  if (backdrop) backdrop.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function openFilterPanel() {
+  const panel    = document.getElementById('filter-panel');
+  const btn      = document.getElementById('filter-toggle-btn');
+  const backdrop = document.getElementById('filter-backdrop');
+  if (!panel) return;
+  panel.hidden   = false;
+  if (backdrop) backdrop.hidden = false;
+  if (btn) btn.setAttribute('aria-expanded', 'true');
+}
+
+function updateFilterBadge() {
+  const badge = document.getElementById('filter-badge');
+  if (!badge) return;
+
+  // Count non-default active filters
+  let count = 0;
+  // Category: not all selected = at least one is off
+  const totalCats   = CATEGORIES.length;
+  const activeCats  = activeCategories.size;
+  if (activeCats < totalCats) count += (totalCats - activeCats);
+  // Time: anything other than "all"
+  if (timeFilter !== 'all') count += 1;
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.hidden = false;
+  } else {
+    badge.hidden = true;
+  }
+}
+
+function setupFilterButton() {
+  const toggleBtn  = document.getElementById('filter-toggle-btn');
+  const closeBtn   = document.getElementById('filter-close-btn');
+  const clearBtn   = document.getElementById('filter-clear-btn');
+  const backdrop   = document.getElementById('filter-backdrop');
+  const panel      = document.getElementById('filter-panel');
+  if (!toggleBtn || !panel) return;
+
+  // Toggle open/close
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+    if (isOpen) {
+      closeFilterPanel();
+    } else {
+      openFilterPanel();
+    }
+  });
+
+  // Close button (X)
+  if (closeBtn) closeBtn.addEventListener('click', closeFilterPanel);
+
+  // Click outside on desktop (backdrop)
+  if (backdrop) {
+    backdrop.addEventListener('click', closeFilterPanel);
+  }
+
+  // Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeFilterPanel();
+  });
+
+  // Clear filters button
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      // Reset categories to all
+      activeCategories = new Set(CATEGORIES.map(c => c.id));
+      document.querySelectorAll('.filter-chip[data-category]').forEach(c =>
+        c.classList.add('active')
+      );
+      // Reset time to all
+      timeFilter = 'all';
+      document.querySelectorAll('.filter-chip[data-time]').forEach(c =>
+        c.classList.toggle('active', c.dataset.time === 'all')
+      );
+      applyFilters();
+      updateFilterBadge();
+    });
+  }
+
+  // Update badge whenever a chip is clicked
+  panel.addEventListener('click', (e) => {
+    if (e.target.matches('.filter-chip')) {
+      // badge update runs after the chip's own listener via setTimeout
+      setTimeout(updateFilterBadge, 0);
+    }
+  });
+}
+
 /* ── Boot ───────────────────────────────────────────────────── */
 function boot() {
   // Guard: Leaflet must be loaded before we try to use L.*
@@ -806,6 +909,7 @@ function boot() {
   buildLegend();
   initFilterChips();
   setupFilterBar();
+  setupFilterButton();
   setupMyLocationButton();
   setupZoomControls();
   setupReportModal();

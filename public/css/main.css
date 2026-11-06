@@ -363,6 +363,19 @@ p { line-height: 1.7; }
   background: rgba(255, 209, 102, 0.1);
 }
 
+/* "Sign in" CTA in the nav — pill style, clearly visible */
+.nav-link-cta {
+  background: var(--amber);
+  color: var(--navy) !important;
+  border-radius: 20px;
+  padding: 7px 18px;
+  font-weight: 700;
+}
+.nav-link-cta:hover {
+  background: #f0923e !important;
+  color: var(--navy) !important;
+}
+
 /* Hamburger */
 .nav-hamburger {
   display: flex;
@@ -468,9 +481,77 @@ p { line-height: 1.7; }
 
 .hero-actions {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+/* Each button in the hero pair grows equally, side by side */
+.hero-actions .btn {
+  flex: 1 1 140px;
+  max-width: 210px;
+}
+
+/* Ghost button is on navy — make it clearly visible */
+.hero-actions .btn-ghost {
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+}
+.hero-actions .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--white);
+  color: var(--white);
+}
+
+/* Below 340 px: stack full-width, centred */
+@media (max-width: 339px) {
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-actions .btn {
+    flex: none;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+/* Community section — same side-by-side pair */
+.community-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+.community-actions .btn {
+  flex: 1 1 140px;
+  max-width: 210px;
+}
+.community-actions .btn-ghost {
+  color: var(--white);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+}
+.community-actions .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--white);
+  color: var(--white);
+}
+@media (max-width: 339px) {
+  .community-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .community-actions .btn {
+    flex: none;
+    max-width: 100%;
+    width: 100%;
+  }
 }
 
 /* ── 9. FORM COMPONENTS ─────────────────────────────────────── */

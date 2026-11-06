@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <title>Login — Jonaki Pothe</title>
   <meta name="description" content="Sign in to Jonaki Pothe — the community safety reporting platform for Siliguri." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -345,14 +347,14 @@
 
   <!-- ── Header ── -->
   <header class="login-header" role="banner">
-    <div class="login-header__logo" aria-hidden="true">🌟</div>
+    <img src="/assets/logo.png" alt="" width="40" height="40" aria-hidden="true" />
     <span class="login-header__title">Jonaki Pothe</span>
   </header>
 
   <!-- ── Main Login Card ── -->
   <main class="login-main" id="login-main" role="main">
     <div class="login-card" role="region" aria-labelledby="login-heading">
-      <span class="login-card__firefly" aria-hidden="true">🌟</span>
+      <img src="/assets/logo.png" alt="" width="80" height="80" class="login-card__firefly" aria-hidden="true" />
       <h1 class="login-card__heading" id="login-heading">Welcome to Jonaki Pothe</h1>
       <p class="login-card__desc">
         Sign in to report hazards, confirm sightings, and use SOS features.
@@ -505,8 +507,7 @@
 
       try {
         const result = await signInWithGoogle();
-const user = result.user || result;
-console.log("DEBUG signInWithGoogle result:", result, "uid:", user && user.uid);
+        const user = result.user || result;
         const exists = await checkUserProfileExists(user.uid);
 
         if (exists) {

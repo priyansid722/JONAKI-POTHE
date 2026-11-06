@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <title>Map — Jonaki Pothe</title>
   <meta name="description" content="Community safety map for Siliguri. View hazard reports and safe spots." />
   <meta name="theme-color" content="#14213D" />
@@ -27,7 +29,7 @@
 <header class="map-header" role="banner">
   <a href="/" class="map-back-btn" aria-label="Back to home">←</a>
   <div class="map-brand">
-    <img src="/assets/logo.svg" alt="" width="32" height="16" aria-hidden="true" />
+    <img src="/assets/logo.png" alt="" width="32" height="32" aria-hidden="true" />
     <span>Jonaki Pothe</span>
   </div>
   <div class="auth-indicator" aria-live="polite">
@@ -37,23 +39,59 @@
   <a href="/login.html" class="btn btn-ghost header-login-btn" style="display:none;padding:6px 14px;font-size:0.82rem;">Sign in</a>
 </header>
 
-<!-- ══ FILTER BAR ══════════════════════════════════════════════════════════ -->
-<div class="filter-bar" role="toolbar" aria-label="Filter reports">
-  <!-- Category filters -->
-  <button class="filter-chip active" data-category="all">All</button>
-  <button class="filter-chip" data-category="dark_street">🌑 Dark Street</button>
-  <button class="filter-chip" data-category="stray_dogs">🐕 Stray Dogs</button>
-  <button class="filter-chip" data-category="waterlogging">💧 Water</button>
-  <button class="filter-chip" data-category="isolated_area">⚠️ Isolated</button>
-  <button class="filter-chip" data-category="broken_road">🚧 Broken Road</button>
-  <button class="filter-chip" data-category="safe_spot">✅ Safe Spot</button>
-  <!-- Divider -->
-  <div class="filter-divider" aria-hidden="true">|</div>
-  <!-- Time filters -->
-  <button class="filter-chip active" data-time="all">🕐 All Times</button>
-  <button class="filter-chip" data-time="day">☀️ Day</button>
-  <button class="filter-chip" data-time="night">🌙 Night</button>
+<!-- ══ FILTER BUTTON ════════════════════════════════════════════════════════ -->
+<button
+  id="filter-toggle-btn"
+  class="filter-toggle-btn"
+  aria-expanded="false"
+  aria-controls="filter-panel"
+  aria-label="Open filter panel"
+  title="Filter reports"
+>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+  <span class="filter-btn-label">Filter</span>
+  <span id="filter-badge" class="filter-badge" aria-label="active filters" hidden></span>
+</button>
+
+<!-- ══ FILTER PANEL ═════════════════════════════════════════════════════════ -->
+<div id="filter-panel" class="filter-panel" role="dialog" aria-modal="false" aria-label="Filter reports" hidden>
+  <!-- Mobile bottom-sheet handle -->
+  <div class="filter-panel-drag" aria-hidden="true"></div>
+
+  <!-- Panel header -->
+  <div class="filter-panel-header">
+    <span class="filter-panel-title">Filter reports</span>
+    <button id="filter-close-btn" class="filter-close-btn" aria-label="Close filters">✕</button>
+  </div>
+
+  <!-- Chip groups (kept in place — existing JS listeners still work) -->
+  <div class="filter-panel-body">
+    <p class="filter-group-label">Category</p>
+    <div class="filter-chip-group" role="group" aria-label="Filter by category">
+      <button class="filter-chip active" data-category="all">All</button>
+      <button class="filter-chip" data-category="dark_street">🌑 Dark Street</button>
+      <button class="filter-chip" data-category="stray_dogs">🐕 Stray Dogs</button>
+      <button class="filter-chip" data-category="waterlogging">💧 Water</button>
+      <button class="filter-chip" data-category="isolated_area">⚠️ Isolated</button>
+      <button class="filter-chip" data-category="broken_road">🚧 Broken Road</button>
+      <button class="filter-chip" data-category="safe_spot">✅ Safe Spot</button>
+    </div>
+
+    <p class="filter-group-label" style="margin-top:14px;">Time of day</p>
+    <div class="filter-chip-group" role="group" aria-label="Filter by time">
+      <button class="filter-chip active" data-time="all">🕐 All Times</button>
+      <button class="filter-chip" data-time="day">☀️ Day</button>
+      <button class="filter-chip" data-time="night">🌙 Night</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="filter-panel-footer">
+    <button id="filter-clear-btn" class="filter-clear-btn">Clear filters</button>
+  </div>
 </div>
+<!-- Backdrop for clicking outside on desktop -->
+<div id="filter-backdrop" class="filter-backdrop" hidden></div>
 
 <!-- ══ FLOATING CONTROLS (right side) ════════════════════════════════════= -->
 <div class="map-controls" role="group" aria-label="Map controls">
