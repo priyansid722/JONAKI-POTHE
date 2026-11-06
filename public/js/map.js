@@ -520,8 +520,9 @@ function openReportModal(keepPlacedPin = true) {
   if (!keepPlacedPin) {
     // Reset pin info display if no pin
   }
-  // Close filter panel if open
+  // Close filter panel and legend if open
   closeFilterPanel();
+  closeLegend();
   const modal = document.getElementById('report-modal');
   const backdrop = document.querySelector('.report-modal-backdrop');
   if (modal) modal.classList.add('open');
@@ -695,23 +696,69 @@ async function handleReportSubmit() {
   }
 }
 
-/* ── Legend ─────────────────────────────────────────────────── */
+/* \u2500\u2500 Legend \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 function buildLegend() {
   const content = document.getElementById('legend-content');
   if (!content) return;
-
   content.innerHTML = CATEGORIES.map(cat => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${cat.color}"></div>
       <span>${cat.emoji} ${cat.label}</span>
     </div>
   `).join('');
+  // Toggle behaviour handled by setupLegendButton()
+}
 
-  const toggleBtn = document.querySelector('.legend-toggle-btn');
-  const box = document.getElementById('legend-box');
-  if (toggleBtn && box) {
-    toggleBtn.addEventListener('click', () => {
-      box.classList.toggle('collapsed');
+function closeLegend() {
+  const box      = document.getElementById('legend-box');
+  const btn      = document.getElementById('legend-btn');
+  const backdrop = document.getElementById('legend-backdrop');
+  if (!box) return;
+  box.hidden = true;
+  if (backdrop) backdrop.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function openLegend() {
+  const box      = document.getElementById('legend-box');
+  const btn      = document.getElementById('legend-btn');
+  const backdrop = document.getElementById('legend-backdrop');
+  if (!box) return;
+  box.hidden = false;
+  if (backdrop) backdrop.hidden = false;
+  if (btn) btn.setAttribute('aria-expanded', 'true');
+}
+
+function setupLegendButton() {
+  const legendBtn  = document.getElementById('legend-btn');
+  const closeBtn   = document.getElementById('legend-close-btn');
+  const backdrop   = document.getElementById('legend-backdrop');
+  const box        = document.getElementById('legend-box');
+  if (!legendBtn || !box) return;
+
+  legendBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (legendBtn.getAttribute('aria-expanded') === 'true') {
+      closeLegend();
+    } else {
+      closeFilterPanel();   // mutual exclusion with filter panel
+      openLegend();
+    }
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeLegend);
+  if (backdrop) backdrop.addEventListener('click', closeLegend);
+
+  // Escape key closes legend
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLegend();
+  });
+
+  // Tapping the map closes legend on mobile
+  const mapEl = document.getElementById('map');
+  if (mapEl) {
+    mapEl.addEventListener('click', () => {
+      if (legendBtn.getAttribute('aria-expanded') === 'true') closeLegend();
     });
   }
 }
@@ -910,6 +957,7 @@ function boot() {
   initFilterChips();
   setupFilterBar();
   setupFilterButton();
+  setupLegendButton();
   setupMyLocationButton();
   setupZoomControls();
   setupReportModal();
