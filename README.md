@@ -8,11 +8,11 @@
 
 Jonaki Pothe is a, progressive web application (PWA) that empowers communities — especially women and vulnerable road users — to collaboratively map safety hazards in real time. Users can:
 
-- **Report** hazards (dark streets, stray dogs, waterlogging, isolated areas, broken roads) on an interactive map.
-- **Confirm** existing reports to increase their credibility score.
-- **Flag** inappropriate content for admin review.
-- **Trigger SOS** alerts that notify pre-saved emergency contacts.
-- **Browse safe spots** curated by administrators.
+- **Report**- hazards (dark streets, stray dogs, waterlogging, isolated areas, broken roads) on an interactive map.
+- **Confirm**- existing reports to increase their credibility score.
+- **Flag**- inappropriate content for admin review.
+- **Trigger SOS**- alerts that notify pre-saved emergency contacts.
+- **Browse safe spots**- curated by administrators.
 - Filter and explore reports by category, time of day, and severity.
 
 All data is stored in **Firebase Firestore** with strict server-side security rules, served via **Firebase Hosting**, and protected with **Firebase App Check** (reCAPTCHA v3).
