@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <title>Login — Jonaki Pothe</title>
+  <meta name="description" content="Sign in to Jonaki Pothe — the community safety reporting platform for Siliguri." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/css/main.css" />
+  <style>
+    /* ── Page-specific overrides ── */
+    .login-page {
+      min-height: 100vh;
+      background: var(--cream);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .login-header {
+      background: var(--navy);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .login-header__logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .login-header__title {
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .login-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 36px;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(20, 33, 61, 0.1);
+      text-align: center;
+    }
+
+    .login-card__firefly {
+      font-size: 3rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .login-card__heading {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0 0 10px;
+    }
+
+    .login-card__desc {
+      color: #555;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 0 0 24px;
+    }
+
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+      color: #aaa;
+      font-size: 0.85rem;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e0e0e0;
+    }
+
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 13px 20px;
+      background: #fff;
+      color: #3c4043;
+      border: 1.5px solid #dadce0;
+      border-radius: 10px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-google:hover {
+      background: #f8f9fa;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .btn-google:focus-visible {
+      outline: 3px solid var(--yellow);
+      outline-offset: 2px;
+    }
+
+    .btn-google svg {
+      flex-shrink: 0;
+    }
+
+    .btn-browse {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 20px;
+      background: transparent;
+      color: var(--navy);
+      border: 1.5px solid var(--navy);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      box-sizing: border-box;
+    }
+
+    .btn-browse:hover {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    /* ── Phone OTP placeholder (commented-out UI block) ──
+    .phone-otp-section {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .phone-otp-section .input-group {
+      margin-bottom: 12px;
+    }
+    .phone-otp-section label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--navy);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .phone-input-wrap {
+      display: flex;
+      gap: 8px;
+    }
+    .phone-input-wrap input {
+      flex: 1;
+    }
+    #send-otp-btn {
+      white-space: nowrap;
+      padding: 10px 14px;
+    }
+    .otp-row {
+      display: flex;
+      gap: 8px;
+    }
+    .otp-row input {
+      flex: 1;
+    }
+    ── end phone OTP placeholder ── */
+
+    /* ── Consent Dialog ── */
+    #consent-dialog {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 33, 61, 0.65);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    #consent-dialog.visible {
+      display: flex;
+    }
+
+    .consent-modal {
+      background: #fff;
+      border-radius: 20px;
+      padding: 36px 32px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 12px 48px rgba(20, 33, 61, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .consent-modal__heading {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0 0 16px;
+    }
+
+    .consent-modal__body {
+      font-size: 0.93rem;
+      color: #444;
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .consent-modal__body a {
+      color: var(--navy);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    .consent-check-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      padding: 14px;
+      background: #FFF8EC;
+      border-radius: 10px;
+      border: 1.5px solid #FFD166;
+    }
+
+    .consent-box {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      accent-color: var(--navy);
+      cursor: pointer;
+      margin-top: 2px;
+    }
+
+    .consent-check-wrap label {
+      font-size: 0.93rem;
+      color: var(--navy);
+      font-weight: 500;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .consent-actions {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    #create-account-btn {
+      background: var(--amber);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    #create-account-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #create-account-btn:not(:disabled):hover {
+      background: #e08a3a;
+    }
+
+    #consent-cancel-btn {
+      background: transparent;
+      color: var(--navy);
+      border: 1.5px solid var(--navy);
+      border-radius: 10px;
+      padding: 11px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #consent-cancel-btn:hover {
+      background: rgba(20, 33, 61, 0.06);
+    }
+
+    /* ── Error state ── */
+    #login-error {
+      display: none;
+      background: #fde8ea;
+      color: #c0282f;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    /* ── Loading spinner on button ── */
+    .btn-google.loading {
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 28px 20px;
+        border-radius: 16px;
+      }
+      .consent-modal {
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+<body class="login-page">
+
+  <!-- ── Header ── -->
+  <header class="login-header" role="banner">
+    <div class="login-header__logo" aria-hidden="true">🌟</div>
+    <span class="login-header__title">Jonaki Pothe</span>
+  </header>
+
+  <!-- ── Main Login Card ── -->
+  <main class="login-main" id="login-main" role="main">
+    <div class="login-card" role="region" aria-labelledby="login-heading">
+      <span class="login-card__firefly" aria-hidden="true">🌟</span>
+      <h1 class="login-card__heading" id="login-heading">Welcome to Jonaki Pothe</h1>
+      <p class="login-card__desc">
+        Sign in to report hazards, confirm sightings, and use SOS features.
+        You can view the map without signing in.
+      </p>
+
+      <!-- Browse without login -->
+      <a href="map.html" class="btn-browse" aria-label="Browse map without signing in">
+        🗺 Browse Map Without Signing In
+      </a>
+
+      <div class="login-divider" aria-hidden="true">— or —</div>
+
+      <!-- Google Sign-In -->
+      <button
+        id="google-signin-btn"
+        class="btn-google"
+        type="button"
+        aria-label="Continue with Google"
+      >
+        <!-- Google logo SVG (official brand colours) -->
+        <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.1 0 5.9 1.1 8.1 2.9l6-6C34.4 3.2 29.5 1 24 1 14.8 1 7 6.7 3.7 14.6l7 5.4C12.5 13.6 17.8 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8C43.6 37.5 46.5 31.5 46.5 24.5z"/>
+          <path fill="#FBBC05" d="M10.7 28.6c-.5-1.4-.8-2.9-.8-4.6s.3-3.2.8-4.6l-7-5.4C2.1 17 1 20.4 1 24s1.1 7 3.7 10l7-5.4z"/>
+          <path fill="#34A853" d="M24 47c5.5 0 10.1-1.8 13.5-4.9l-7.5-5.8c-1.9 1.3-4.3 2-6 2-6.2 0-11.5-4.1-13.3-9.7l-7 5.4C7 41.3 14.8 47 24 47z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <!-- PHONE OTP: Add phone sign-in here -->
+      <!--
+      <div class="phone-otp-section">
+        <div class="input-group">
+          <label for="phone-input">Mobile Number</label>
+          <div class="phone-input-wrap">
+            <span class="phone-prefix">+91</span>
+            <input id="phone-input" type="tel" inputmode="numeric" maxlength="10"
+              placeholder="10-digit number" autocomplete="tel-national" />
+            <button id="send-otp-btn" class="btn btn-secondary" type="button">Send OTP</button>
+          </div>
+        </div>
+        <div id="otp-row" class="input-group" style="display:none">
+          <label for="otp-input">Enter OTP</label>
+          <div class="otp-row">
+            <input id="otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" />
+            <button id="verify-otp-btn" class="btn btn-primary" type="button">Verify</button>
+          </div>
+        </div>
+        <div id="recaptcha-container"></div>
+      </div>
+      -->
+
+      <div id="login-error" role="alert" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <!-- ── Consent Dialog ── -->
+  <div
+    id="consent-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="consent-heading"
+    aria-describedby="consent-body"
+  >
+    <div class="consent-modal">
+      <h2 class="consent-modal__heading" id="consent-heading">Before you join 👋</h2>
+      <div class="consent-modal__body" id="consent-body">
+        <p>
+          By creating an account, you agree to our
+          <a href="/terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+          and
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+        </p>
+        <p>
+          We collect your <strong>name and email</strong> to identify your account.
+          Your location is only accessed when you trigger SOS or use <em>"My Location"</em>.
+          Reports you post are stored in our database. <strong>We never sell your data.</strong>
+        </p>
+      </div>
+
+      <label class="consent-check-wrap" for="consent-checkbox">
+        <input
+          type="checkbox"
+          id="consent-checkbox"
+          class="consent-box"
+          aria-required="true"
+        />
+        <span>
+          I have read and agree to the
+          <a href="/terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+          and
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        </span>
+      </label>
+
+      <div class="consent-actions">
+        <button id="create-account-btn" type="button" disabled aria-disabled="true">
+          ✅ Create My Account
+        </button>
+        <button id="consent-cancel-btn" type="button">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Scripts ── -->
+  <script type="module">
+    import { signInWithGoogle, createUserProfile, checkUserProfileExists, onAuthChange, signOutUser } from "/js/auth.js";
+    import { db } from "/js/firebase-config.js";
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const googleBtn        = document.getElementById("google-signin-btn");
+    const consentDialog    = document.getElementById("consent-dialog");
+    const consentCheckbox  = document.getElementById("consent-checkbox");
+    const createAccountBtn = document.getElementById("create-account-btn");
+    const consentCancelBtn = document.getElementById("consent-cancel-btn");
+    const loginError       = document.getElementById("login-error");
+
+    let _pendingUser = null; // temp Firebase user awaiting consent
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showError(msg) {
+      loginError.textContent = msg;
+      loginError.style.display = "block";
+      setTimeout(() => { loginError.style.display = "none"; }, 5000);
+    }
+
+    // ── Redirect if already logged in ─────────────────────────────────────────
+    onAuthChange(async (user) => {
+      if (user && consentDialog && !consentDialog.classList.contains("visible")) {
+        // Check if profile exists (returning user)
+        try {
+          const exists = await checkUserProfileExists(user.uid);
+          if (exists) {
+            window.location.href = "map.html";
+          }
+          // If not, don't redirect — wait for consent flow
+        } catch (err) {
+          console.error("Profile check error on auth change:", err);
+        }
+      }
+    });
+
+    // ── Google Sign-In ────────────────────────────────────────────────────────
+    googleBtn.addEventListener("click", async () => {
+      googleBtn.classList.add("loading");
+      googleBtn.textContent = "Signing in…";
+
+      try {
+        const result = await signInWithGoogle();
+const user = result.user || result;
+console.log("DEBUG signInWithGoogle result:", result, "uid:", user && user.uid);
+        const exists = await checkUserProfileExists(user.uid);
+
+        if (exists) {
+          // Returning user
+          window.location.href = "map.html";
+        } else {
+          // New user — show consent dialog
+          _pendingUser = user;
+          consentDialog.classList.add("visible");
+          consentDialog.style.display = "flex";
+        }
+      } catch (err) {
+        console.error("Google sign-in error:", err);
+        const msg =
+          err.code === "auth/popup-closed-by-user"
+            ? "Sign-in was cancelled. Please try again."
+            : err.code === "auth/network-request-failed"
+            ? "Network error. Please check your connection."
+            : `Sign-in failed: ${err.message || "Unknown error"}`;
+        showError(msg);
+        // Restore button
+        googleBtn.classList.remove("loading");
+        // Restore Google logo + text
+        googleBtn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.1 0 5.9 1.1 8.1 2.9l6-6C34.4 3.2 29.5 1 24 1 14.8 1 7 6.7 3.7 14.6l7 5.4C12.5 13.6 17.8 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8C43.6 37.5 46.5 31.5 46.5 24.5z"/>
+            <path fill="#FBBC05" d="M10.7 28.6c-.5-1.4-.8-2.9-.8-4.6s.3-3.2.8-4.6l-7-5.4C2.1 17 1 20.4 1 24s1.1 7 3.7 10l7-5.4z"/>
+            <path fill="#34A853" d="M24 47c5.5 0 10.1-1.8 13.5-4.9l-7.5-5.8c-1.9 1.3-4.3 2-6 2-6.2 0-11.5-4.1-13.3-9.7l-7 5.4C7 41.3 14.8 47 24 47z"/>
+          </svg>
+          Continue with Google`;
+      }
+    });
+
+    // ── Consent checkbox enables Create button ────────────────────────────────
+    consentCheckbox.addEventListener("change", () => {
+      createAccountBtn.disabled = !consentCheckbox.checked;
+      createAccountBtn.setAttribute("aria-disabled", String(!consentCheckbox.checked));
+    });
+
+    // ── Create account ────────────────────────────────────────────────────────
+    createAccountBtn.addEventListener("click", async () => {
+      if (!_pendingUser) return;
+      createAccountBtn.disabled = true;
+      createAccountBtn.textContent = "Creating account…";
+
+      try {
+        await createUserProfile(_pendingUser, true);
+        window.location.href = "map.html";
+      } catch (err) {
+        console.error("Create profile error:", err);
+        showError("Failed to create account: " + (err.message || "Please try again."));
+        createAccountBtn.disabled = false;
+        createAccountBtn.textContent = "✅ Create My Account";
+      }
+    });
+
+    // ── Cancel consent ────────────────────────────────────────────────────────
+    consentCancelBtn.addEventListener("click", async () => {
+      try {
+        await signOutUser();
+      } catch (err) {
+        console.error("Sign-out error:", err);
+      }
+      _pendingUser = null;
+      consentDialog.classList.remove("visible");
+      consentDialog.style.display = "none";
+      consentCheckbox.checked = false;
+      createAccountBtn.disabled = true;
+      // Restore Google button
+      googleBtn.classList.remove("loading");
+      googleBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.1 0 5.9 1.1 8.1 2.9l6-6C34.4 3.2 29.5 1 24 1 14.8 1 7 6.7 3.7 14.6l7 5.4C12.5 13.6 17.8 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8C43.6 37.5 46.5 31.5 46.5 24.5z"/>
+          <path fill="#FBBC05" d="M10.7 28.6c-.5-1.4-.8-2.9-.8-4.6s.3-3.2.8-4.6l-7-5.4C2.1 17 1 20.4 1 24s1.1 7 3.7 10l7-5.4z"/>
+          <path fill="#34A853" d="M24 47c5.5 0 10.1-1.8 13.5-4.9l-7.5-5.8c-1.9 1.3-4.3 2-6 2-6.2 0-11.5-4.1-13.3-9.7l-7 5.4C7 41.3 14.8 47 24 47z"/>
+        </svg>
+        Continue with Google`;
+    });
+  </script>
+</body>
+</html>

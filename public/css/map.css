@@ -1,0 +1,1327 @@
+/* ============================================================
+   map.css — Map-specific styles for Jonaki Pothe
+   ============================================================ */
+
+/* ── Full-screen map container ─────────────────────────────── */
+#map {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* ── Generic overlay base ───────────────────────────────────── */
+.map-overlay {
+  position: absolute;
+  z-index: 400;
+  pointer-events: none;
+}
+.map-overlay * {
+  pointer-events: auto;
+}
+
+/* ── Map header ─────────────────────────────────────────────── */
+.map-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(20, 33, 61, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 209, 102, 0.18);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.map-header .back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFF8EC;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+.map-header .back-btn:hover {
+  background: rgba(255, 209, 102, 0.25);
+}
+
+.map-header .header-logo {
+  font-family: 'Hind Siliguri', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFD166;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.map-header .header-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  color: rgba(255, 248, 236, 0.75);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-header .auth-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  color: rgba(255, 248, 236, 0.85);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.map-header .auth-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #E5646E;
+  flex-shrink: 0;
+}
+.map-header .auth-dot.logged-in {
+  background: #4CAF82;
+}
+
+.map-header .header-login-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 209, 102, 0.5);
+  background: transparent;
+  color: #FFD166;
+  font-size: 12px;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+.map-header .header-login-btn:hover {
+  background: rgba(255, 209, 102, 0.15);
+}
+
+/* ── Map controls (right side) ──────────────────────────────── */
+.map-controls {
+  position: fixed;
+  right: 14px;
+  top: 72px;
+  z-index: 450;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-ctrl-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(20, 33, 61, 0.88);
+  color: #FFF8EC;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s, transform 0.15s;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.map-ctrl-btn:hover {
+  background: rgba(20, 33, 61, 0.98);
+  transform: scale(1.07);
+}
+.map-ctrl-btn:active {
+  transform: scale(0.96);
+}
+.map-ctrl-btn.active {
+  background: #14213D;
+  box-shadow: 0 0 0 2px #FFD166;
+}
+
+/* ── Filter bar ─────────────────────────────────────────────── */
+.filter-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 110px;
+  z-index: 450;
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  align-items: center;
+}
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: rgba(20, 33, 61, 0.78);
+  color: rgba(255, 248, 236, 0.9);
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  white-space: nowrap;
+  user-select: none;
+}
+.filter-chip:hover {
+  border-color: #FFD166;
+  background: rgba(20, 33, 61, 0.92);
+}
+.filter-chip.active {
+  background: #FFD166;
+  color: #14213D;
+  border-color: #FFD166;
+}
+.filter-chip .chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.filter-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 2px;
+}
+
+/* time filter chips */
+.filter-chip.time-chip.active {
+  background: #B9A7E8;
+  color: #14213D;
+  border-color: #B9A7E8;
+}
+
+/* ── Report modal (slide-up bottom sheet) ───────────────────── */
+.report-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 800;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.report-modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#report-modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 850;
+  background: #FFF8EC;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.25);
+  /* ── Layout: flex column so header sticks and body scrolls ── */
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+}
+#report-modal.open {
+  transform: translateY(0);
+}
+
+@media (min-width: 600px) {
+  #report-modal {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(100%);
+    width: 480px;
+    border-radius: 20px 20px 0 0;
+  }
+  #report-modal.open {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.modal-drag-handle,
+.report-modal-drag {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: #c5bdb0;
+  margin: 10px auto 6px;
+  flex-shrink: 0;
+}
+
+/* ── Sticky header: X button never overlaps content ─────────── */
+.modal-header,
+.report-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px 10px;
+  border-bottom: 1px solid rgba(20, 33, 61, 0.1);
+  background: #FFF8EC;
+  /* stick to top of the flex column */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  flex-shrink: 0;
+}
+.modal-header h2,
+.report-modal-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #14213D;
+  margin: 0;
+}
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(20, 33, 61, 0.08);
+  color: #14213D;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.modal-close-btn:hover {
+  background: rgba(20, 33, 61, 0.15);
+}
+
+.modal-body,
+.report-modal-body {
+  padding: 16px 20px 24px;
+  overflow-y: auto;
+  flex: 1 1 auto;        /* fills remaining height and scrolls */
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+}
+
+/* ── Step indicator ─────────────────────────────────────────── */
+.report-steps,
+.report-steps-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;               /* fill header width, leaving room for X */
+  min-width: 0;
+}
+.report-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(27, 27, 58, 0.45);
+}
+.report-step.active {
+  color: #14213D;
+}
+.report-step.done {
+  color: #4CAF82;
+}
+/* circle — works whether the class is .step-num or just a bare <span> */
+.step-num,
+.report-step > span {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+.report-step.active .step-num,
+.report-step.active > span {
+  background: #14213D;
+  color: #FFD166;
+  border-color: #14213D;
+}
+.report-step.done .step-num,
+.report-step.done > span {
+  background: #4CAF82;
+  color: #fff;
+  border-color: #4CAF82;
+}
+/* connector line — works with .step-connector or .report-step-line */
+.step-connector,
+.report-step-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(27, 27, 58, 0.15);
+  margin: 0 6px;
+}
+
+/* ── Step panels ─────────────────────────────────────────────── */
+.step-panel {
+  display: none;
+}
+.step-panel.active {
+  display: block;
+}
+
+/* location choice buttons — also aliased for HTML class .location-method-btns */
+.location-choice-btns,
+.location-method-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+.loc-choice-btn,
+.location-method-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(20, 33, 61, 0.15);
+  background: #fff;
+  color: #14213D;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s, background 0.2s;
+}
+.loc-choice-btn:hover,
+.location-method-btn:hover {
+  border-color: #FFD166;
+  background: #fffbf0;
+}
+.loc-choice-btn .loc-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.loc-choice-desc {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(27, 27, 58, 0.55);
+  margin-top: 2px;
+}
+
+/* pin placed indicator */
+.pin-placed-info {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(76, 175, 130, 0.1);
+  border: 1.5px solid rgba(76, 175, 130, 0.4);
+  border-radius: 10px;
+  margin-top: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  color: #2e7d57;
+  font-weight: 600;
+}
+.pin-placed-info.visible {
+  display: flex;
+}
+.btn-next-step {
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px;
+  border-radius: 10px;
+  border: none;
+  background: #14213D;
+  color: #FFD166;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: none;
+  transition: background 0.2s;
+}
+.btn-next-step.visible {
+  display: block;
+}
+.btn-next-step:hover {
+  background: #1a2d50;
+}
+
+/* form fields */
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #14213D;
+  margin-bottom: 6px;
+}
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(20, 33, 61, 0.2);
+  background: #fff;
+  color: #1B1B3A;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  resize: none;
+}
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #14213D;
+}
+.char-counter {
+  text-align: right;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  color: rgba(27, 27, 58, 0.5);
+  margin-top: 4px;
+}
+.char-counter.warn {
+  color: #E5646E;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.radio-pill {
+  display: none;
+}
+.radio-pill + label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(20, 33, 61, 0.2);
+  background: #fff;
+  color: #1B1B3A;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.radio-pill:checked + label {
+  background: #14213D;
+  color: #FFD166;
+  border-color: #14213D;
+}
+
+/* anonymous toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid rgba(20, 33, 61, 0.08);
+  border-bottom: 1px solid rgba(20, 33, 61, 0.08);
+}
+.toggle-row label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #14213D;
+}
+.toggle-row .toggle-desc {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(27, 27, 58, 0.55);
+  display: block;
+  margin-top: 1px;
+}
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  background: #ccc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+.toggle-track::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.25s;
+}
+.toggle-switch input:checked + .toggle-track {
+  background: #4CAF82;
+}
+.toggle-switch input:checked + .toggle-track::before {
+  transform: translateX(20px);
+}
+
+/* modal action buttons */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.btn-cancel-modal {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(20, 33, 61, 0.2);
+  background: transparent;
+  color: #14213D;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-cancel-modal:hover {
+  background: rgba(20, 33, 61, 0.06);
+}
+.btn-submit-report {
+  flex: 2;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #14213D;
+  color: #FFD166;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+.btn-submit-report:hover {
+  background: #1a2d50;
+}
+.btn-submit-report:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* validation errors */
+.field-error {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  color: #E5646E;
+  margin-top: 4px;
+  display: none;
+}
+.field-error.visible {
+  display: block;
+}
+
+/* ── Marker popup ───────────────────────────────────────────── */
+.leaflet-popup-content-wrapper.marker-popup {
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  padding: 0;
+  overflow: hidden;
+  border: none;
+  min-width: 230px;
+  max-width: 280px;
+}
+.leaflet-popup-content {
+  margin: 0 !important;
+}
+.marker-popup .leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+.popup-inner {
+  padding: 14px 16px 12px;
+  font-family: 'Nunito', sans-serif;
+}
+.popup-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.popup-desc {
+  font-size: 13px;
+  color: #1B1B3A;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.popup-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.popup-meta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(27, 27, 58, 0.6);
+  background: rgba(27, 27, 58, 0.06);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.popup-time-ago {
+  font-size: 11px;
+  color: rgba(27, 27, 58, 0.45);
+  margin-bottom: 8px;
+}
+.popup-confirmations {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4CAF82;
+  margin-bottom: 10px;
+}
+.popup-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.popup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1.5px solid currentColor;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.18s;
+}
+.popup-btn.confirm-btn {
+  color: #4CAF82;
+}
+.popup-btn.confirm-btn:hover {
+  background: rgba(76, 175, 130, 0.1);
+}
+.popup-btn.confirm-btn.confirmed {
+  background: rgba(76, 175, 130, 0.12);
+  opacity: 0.65;
+  cursor: default;
+}
+.popup-btn.flag-btn {
+  color: #E5646E;
+}
+.popup-btn.flag-btn:hover {
+  background: rgba(229, 100, 110, 0.1);
+}
+.popup-btn.flag-btn.flagged {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* safe spot popup */
+.popup-safe-spot .popup-category-badge {
+  background: rgba(76, 175, 130, 0.12);
+  color: #2e7d57;
+}
+.popup-phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #14213D;
+  text-decoration: none;
+}
+.popup-phone-link:hover {
+  text-decoration: underline;
+}
+.open-24h-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(76, 175, 130, 0.15);
+  color: #2e7d57;
+  margin-left: 6px;
+}
+
+/* ── Legend box ─────────────────────────────────────────────── */
+#legend-box {
+  position: fixed;
+  left: 14px;
+  bottom: 110px;
+  z-index: 450;
+  background: rgba(20, 33, 61, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.3);
+  min-width: 150px;
+  transition: max-height 0.3s ease;
+  max-height: 300px;
+}
+#legend-box.collapsed {
+  max-height: 38px;
+}
+
+.legend-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #FFD166;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.legend-toggle-btn .legend-caret {
+  transition: transform 0.3s;
+  font-style: normal;
+  font-size: 10px;
+}
+#legend-box.collapsed .legend-toggle-btn .legend-caret {
+  transform: rotate(180deg);
+}
+
+.legend-content {
+  padding: 4px 12px 10px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  color: rgba(255, 248, 236, 0.85);
+  font-weight: 600;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ── Add Report FAB ─────────────────────────────────────────── */
+.add-report-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 88px;
+  z-index: 460;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: #F4A259;
+  color: #fff;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(244, 162, 89, 0.5);
+  transition: background 0.2s, transform 0.15s;
+}
+.add-report-fab:hover {
+  background: #e8914a;
+  transform: scale(1.07);
+}
+.add-report-fab:active {
+  transform: scale(0.95);
+}
+
+/* ── SOS FAB ────────────────────────────────────────────────── */
+.sos-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 24px;
+  z-index: 460;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: #E5646E;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(229, 100, 110, 0.55);
+  transition: background 0.2s, transform 0.15s;
+}
+.sos-fab:hover {
+  background: #d4545e;
+  transform: scale(1.07);
+}
+.sos-fab:active {
+  transform: scale(0.95);
+}
+.sos-fab.hidden {
+  display: none;
+}
+
+/* ── SOS Overlay (countdown) ────────────────────────────────── */
+#sos-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(229, 100, 110, 0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#sos-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sos-countdown-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.5px;
+}
+.sos-countdown-num {
+  font-family: 'Poppins', sans-serif;
+  font-size: 100px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.sos-cancel-countdown-btn {
+  padding: 12px 36px;
+  border-radius: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: transparent;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 8px;
+}
+.sos-cancel-countdown-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── SOS Action Screen ──────────────────────────────────────── */
+#sos-action {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #14213D;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+#sos-action.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sos-action-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sos-action-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #E5646E;
+  letter-spacing: 1px;
+}
+.sos-action-body {
+  flex: 1;
+  padding: 20px 20px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.sos-call-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 14px;
+  border: none;
+  background: #E5646E;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 18px rgba(229, 100, 110, 0.4);
+  transition: background 0.2s;
+}
+.sos-call-btn:hover {
+  background: #d4545e;
+}
+.sos-action-section-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 248, 236, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+.sos-contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #FFF8EC;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.sos-contact-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sos-contact-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.sos-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 209, 102, 0.4);
+  background: transparent;
+  color: #FFD166;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sos-share-btn:hover {
+  background: rgba(255, 209, 102, 0.1);
+}
+.sos-cancel-action-btn {
+  margin: 10px 20px 20px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: rgba(255, 248, 236, 0.75);
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sos-cancel-action-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+.sos-disclaimer {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 248, 236, 0.4);
+  text-align: center;
+  padding: 0 20px 10px;
+  line-height: 1.6;
+}
+
+/* ── Pin instruction overlay ────────────────────────────────── */
+#pin-instruction {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 60px;
+  z-index: 600;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+#pin-instruction.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.pin-instruction-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: rgba(20, 33, 61, 0.92);
+  color: #FFD166;
+  border-radius: 24px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  gap: 8px;
+  pointer-events: auto;
+}
+.pin-cancel-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 248, 236, 0.65);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 0 0 4px;
+  line-height: 1;
+}
+
+/* ── Location crosshair ─────────────────────────────────────── */
+.location-crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 450;
+  pointer-events: none;
+  display: none;
+}
+.location-crosshair.active {
+  display: block;
+}
+.crosshair-svg {
+  width: 40px;
+  height: 40px;
+  opacity: 0.85;
+}
+
+/* ── Custom Leaflet marker icon styles ──────────────────────── */
+.custom-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.marker-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+.marker-dot.dark_street    { background: #B9A7E8; }
+.marker-dot.stray_dogs     { background: #F4A259; }
+.marker-dot.waterlogging   { background: #60b4d8; }
+.marker-dot.isolated_area  { background: #E5646E; }
+.marker-dot.broken_road    { background: #FFD166; }
+.marker-dot.safe_spot      { background: #4CAF82; }
+
+/* safe spot star marker */
+.safe-star-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #4CAF82;
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 8px rgba(76, 175, 130, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* user location marker */
+.user-location-marker {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4285f4;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.25), 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ── Category badge colors ──────────────────────────────────── */
+.badge-dark_street    { background: rgba(185, 167, 232, 0.18); color: #6b55b8; }
+.badge-stray_dogs     { background: rgba(244, 162, 89, 0.18);  color: #c26d1a; }
+.badge-waterlogging   { background: rgba(96, 180, 216, 0.18);  color: #2278a0; }
+.badge-isolated_area  { background: rgba(229, 100, 110, 0.18); color: #b32f38; }
+.badge-broken_road    { background: rgba(255, 209, 102, 0.22); color: #8a6500; }
+.badge-safe_spot      { background: rgba(76, 175, 130, 0.18);  color: #2e7d57; }
+
+/* ── Toast notification ─────────────────────────────────────── */
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  bottom: 90px;
+  z-index: 1100;
+  background: #14213D;
+  color: #FFF8EC;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  white-space: nowrap;
+  max-width: 90vw;
+  text-align: center;
+}
+.toast.success {
+  background: #4CAF82;
+  color: #fff;
+}
+.toast.error {
+  background: #E5646E;
+  color: #fff;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Leaflet overrides ──────────────────────────────────────── */
+.leaflet-popup-content-wrapper {
+  border-radius: 14px !important;
+}
+.leaflet-popup-tip-container {
+  display: none;
+}
+.leaflet-control-zoom {
+  display: none; /* using custom controls */
+}
+.leaflet-control-attribution {
+  font-size: 9px !important;
+  opacity: 0.6;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  .map-header .header-title {
+    display: none;
+  }
+  .sos-countdown-num {
+    font-size: 80px;
+  }
+  .filter-chip {
+    font-size: 11px;
+    padding: 5px 11px;
+  }
+}
+
+@media (min-width: 768px) {
+  .filter-bar {
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content;
+    max-width: 90vw;
+    bottom: 80px;
+  }
+  #legend-box {
+    bottom: 80px;
+  }
+  .add-report-fab {
+    bottom: 90px;
+  }
+  .sos-fab {
+    bottom: 30px;
+  }
+}

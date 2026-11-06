@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <title>My Reports — Jonaki Pothe</title>
+  <meta name="description" content="View and manage your safety reports on Jonaki Pothe." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+<!-- ══ TOP BAR ═════════════════════════════════════════════════════════════ -->
+<header class="page-top-bar" role="banner">
+  <a href="/map.html" class="page-back-btn" aria-label="Back to map">← Map</a>
+  <h1 class="page-top-bar-title">My Reports</h1>
+  <div style="width:60px"></div><!-- spacer -->
+</header>
+
+<!-- ══ MAIN CONTENT ════════════════════════════════════════════════════════ -->
+<main class="page-container" id="main-content">
+
+  <!-- Auth gate message (shown while loading) -->
+  <div id="auth-loading" class="loading-state">
+    <div class="spinner" role="status" aria-label="Loading…"></div>
+    <p>Checking sign-in…</p>
+  </div>
+
+  <!-- Signed-out message -->
+  <div id="signed-out-msg" class="empty-state" style="display:none;">
+    <div class="empty-icon" aria-hidden="true">🔒</div>
+    <h2>Sign in to see your reports</h2>
+    <p>You need to be signed in to view your reports.</p>
+    <a href="/login.html" class="btn btn-primary" style="margin-top:16px;">Sign In</a>
+  </div>
+
+  <!-- Signed-in content -->
+  <div id="reports-content" style="display:none;">
+
+    <!-- Summary bar -->
+    <div class="stats-row" aria-label="Report summary">
+      <div class="stat-pill"><span id="stat-total">0</span> Total</div>
+      <div class="stat-pill stat-pending"><span id="stat-pending">0</span> Pending</div>
+      <div class="stat-pill stat-approved"><span id="stat-approved">0</span> Approved</div>
+      <div class="stat-pill stat-rejected"><span id="stat-rejected">0</span> Rejected</div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs" role="tablist" aria-label="Filter reports by status">
+      <button class="filter-tab active" role="tab" aria-selected="true" data-filter="all">All</button>
+      <button class="filter-tab" role="tab" aria-selected="false" data-filter="pending">Pending</button>
+      <button class="filter-tab" role="tab" aria-selected="false" data-filter="approved">Approved</button>
+      <button class="filter-tab" role="tab" aria-selected="false" data-filter="rejected">Rejected</button>
+    </div>
+
+    <!-- Reports list -->
+    <div id="reports-list" aria-live="polite" aria-label="Your reports list"></div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div class="empty-icon" aria-hidden="true">📭</div>
+      <h2>No reports yet</h2>
+      <p>You haven't posted any reports yet. Open the map and tap the + button to report a hazard.</p>
+      <a href="/map.html" class="btn btn-primary" style="margin-top:16px;">🗺️ Open the Map</a>
+    </div>
+
+    <!-- Confirm delete dialog -->
+    <div id="delete-confirm-dialog" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" style="display:none;">
+      <div class="modal" style="max-width:340px;">
+        <h3 id="delete-dialog-title" style="margin-bottom:12px;">Delete report?</h3>
+        <p style="color:#666;font-size:0.93rem;margin-bottom:20px;">This cannot be undone. The report will be permanently removed.</p>
+        <div class="form-actions">
+          <button id="delete-cancel-btn" class="btn btn-secondary">Cancel</button>
+          <button id="delete-confirm-btn" class="btn btn-danger">Yes, delete</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /reports-content -->
+
+</main>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<footer class="footer" role="contentinfo" style="margin-top:40px;">
+  <div class="footer-inner">
+    <nav class="footer-links">
+      <a href="/map.html">Map</a>
+      <a href="/emergency-contacts.html">Emergency Contacts</a>
+      <a href="/privacy.html">Privacy</a>
+    </nav>
+  </div>
+</footer>
+
+<script type="module">
+  import { onAuthChange, getCurrentUser } from '/js/auth.js';
+  import { db }                           from '/js/firebase-config.js';
+  import { getUserReports, deleteReport } from '/js/report.js';
+  import {
+    sanitizeText,
+    formatTimeAgo,
+    getCategoryLabel,
+    getCategoryIcon,
+    getSeverityLabel,
+    showToast
+  } from '/js/utils.js';
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let allReports   = [];
+  let activeFilter = 'all';
+  let pendingDeleteId = null;
+  let currentUid   = null;
+
+  // ── DOM refs ───────────────────────────────────────────────────────────────
+  const authLoading     = document.getElementById('auth-loading');
+  const signedOutMsg    = document.getElementById('signed-out-msg');
+  const reportsContent  = document.getElementById('reports-content');
+  const reportsList     = document.getElementById('reports-list');
+  const emptyState      = document.getElementById('empty-state');
+  const deleteDialog    = document.getElementById('delete-confirm-dialog');
+  const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+  const deleteConfirmBtn= document.getElementById('delete-confirm-btn');
+
+  // ── Auth gate ──────────────────────────────────────────────────────────────
+  onAuthChange(async (user) => {
+    authLoading.style.display = 'none';
+    if (!user) {
+      signedOutMsg.style.display = 'block';
+      return;
+    }
+    currentUid = user.uid;
+    reportsContent.style.display = 'block';
+    await loadReports();
+  });
+
+  // ── Load reports ───────────────────────────────────────────────────────────
+  async function loadReports() {
+    reportsList.innerHTML = '<div class="spinner" style="margin:40px auto;" role="status" aria-label="Loading reports…"></div>';
+    try {
+      allReports = await getUserReports(currentUid, db);
+      updateStats();
+      renderReports();
+    } catch (err) {
+      console.error(err);
+      reportsList.innerHTML = '<p class="danger-text" style="text-align:center;padding:24px;">Could not load reports. Please try again.</p>';
+    }
+  }
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  function updateStats() {
+    document.getElementById('stat-total').textContent    = allReports.length;
+    document.getElementById('stat-pending').textContent  = allReports.filter(r => r.status === 'pending').length;
+    document.getElementById('stat-approved').textContent = allReports.filter(r => r.status === 'approved').length;
+    document.getElementById('stat-rejected').textContent = allReports.filter(r => r.status === 'rejected').length;
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function renderReports() {
+    const filtered = activeFilter === 'all'
+      ? allReports
+      : allReports.filter(r => r.status === activeFilter);
+
+    if (filtered.length === 0) {
+      reportsList.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+    emptyState.style.display = 'none';
+
+    reportsList.innerHTML = filtered.map(r => buildReportCard(r)).join('');
+
+    // Wire delete buttons
+    reportsList.querySelectorAll('.btn-delete-report').forEach(btn => {
+      btn.addEventListener('click', () => openDeleteDialog(btn.dataset.reportId));
+    });
+  }
+
+  function buildReportCard(r) {
+    const icon     = getCategoryIcon(r.category);
+    const label    = getCategoryLabel(r.category);
+    const sevLabel = getSeverityLabel(r.severity);
+    const timeAgo  = formatTimeAgo(r.createdAt);
+    const desc     = sanitizeText((r.description || '').slice(0, 120));
+    const statusClass = r.status === 'approved' ? 'badge-approved'
+                      : r.status === 'rejected' ? 'badge-rejected'
+                      : 'badge-pending';
+    const viewOnMapLink = (r.lat && r.lng)
+      ? `<a href="/map.html#${r.lat},${r.lng}" class="btn btn-ghost" style="padding:6px 12px;font-size:0.82rem;">View on Map</a>`
+      : '';
+    const confirms = r.status === 'approved'
+      ? `<span class="confirm-count">✓ ${r.confirmationsCount || 0} confirmation${r.confirmationsCount !== 1 ? 's' : ''}</span>`
+      : '';
+
+    return `
+      <article class="report-card" aria-label="Report: ${label}">
+        <div class="report-card-header">
+          <span class="badge badge-${r.category}">${icon} ${label}</span>
+          <span class="badge ${statusClass}">${r.status}</span>
+        </div>
+        <p class="report-card-desc">${desc}${(r.description || '').length > 120 ? '…' : ''}</p>
+        <div class="report-card-meta">
+          <span>⏱ ${timeAgo}</span>
+          <span>${r.timeOfDay === 'day' ? '☀️ Day' : r.timeOfDay === 'night' ? '🌙 Night' : '🕐 Both'}</span>
+          <span>${r.severity === 'high' ? '🔴' : r.severity === 'medium' ? '🟡' : '🟢'} ${sevLabel}</span>
+          ${r.anonymous ? '<span>👤 Anonymous</span>' : ''}
+          ${confirms}
+        </div>
+        <div class="report-card-actions">
+          ${viewOnMapLink}
+          <button class="btn btn-danger btn-delete-report" data-report-id="${r.id}" style="padding:6px 12px;font-size:0.82rem;">
+            🗑 Delete
+          </button>
+        </div>
+      </article>
+    `;
+  }
+
+  // ── Filter tabs ────────────────────────────────────────────────────────────
+  document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      activeFilter = tab.dataset.filter;
+      renderReports();
+    });
+  });
+
+  // ── Delete dialog ──────────────────────────────────────────────────────────
+  function openDeleteDialog(reportId) {
+    pendingDeleteId = reportId;
+    deleteDialog.style.display = 'flex';
+  }
+
+  function closeDeleteDialog() {
+    pendingDeleteId = null;
+    deleteDialog.style.display = 'none';
+  }
+
+  deleteCancelBtn.addEventListener('click', closeDeleteDialog);
+
+  deleteConfirmBtn.addEventListener('click', async () => {
+    if (!pendingDeleteId || !currentUid) return;
+    deleteConfirmBtn.disabled = true;
+    deleteConfirmBtn.textContent = 'Deleting…';
+    try {
+      await deleteReport(pendingDeleteId, currentUid, db);
+      showToast('Report deleted.', 'success');
+      closeDeleteDialog();
+      await loadReports();
+    } catch (err) {
+      showToast(err.message || 'Could not delete. Try again.', 'error');
+      deleteConfirmBtn.disabled = false;
+      deleteConfirmBtn.textContent = 'Yes, delete';
+    }
+  });
+
+  // Close dialog on backdrop click
+  deleteDialog.addEventListener('click', (e) => {
+    if (e.target === deleteDialog) closeDeleteDialog();
+  });
+</script>
+
+</body>
+</html>

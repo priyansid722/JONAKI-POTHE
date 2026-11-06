@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <title>Admin Dashboard — Jonaki Pothe</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+
+<!-- ══ TOP BAR ═════════════════════════════════════════════════════════════ -->
+<header class="page-top-bar" role="banner">
+  <a href="/map.html" class="page-back-btn" aria-label="Back to map">← Map</a>
+  <h1 class="page-top-bar-title">Admin Dashboard</h1>
+  <button id="btn-signout" class="btn btn-ghost" style="padding:6px 12px;font-size:0.82rem;">Sign out</button>
+</header>
+
+<!-- ══ MAIN ════════════════════════════════════════════════════════════════ -->
+<main class="page-container" id="main-content">
+
+  <!-- Auth loading -->
+  <div id="auth-loading" class="loading-state">
+    <div class="spinner" role="status" aria-label="Checking admin access…"></div>
+    <p>Checking access…</p>
+  </div>
+
+  <!-- Access denied -->
+  <div id="access-denied" class="empty-state" style="display:none;">
+    <div class="empty-icon" aria-hidden="true">🚫</div>
+    <h2>Access Denied</h2>
+    <p>You need an admin account to view this page. See the README for how to set the admin claim.</p>
+    <a href="/map.html" class="btn btn-primary" style="margin-top:16px;">Back to Map</a>
+  </div>
+
+  <!-- Admin content -->
+  <div id="admin-content" style="display:none;">
+
+    <!-- Stats row -->
+    <div class="stats-row" aria-label="Summary statistics" style="margin-bottom:24px;">
+      <div class="stat-pill stat-pending"><span id="stat-pending">…</span> Pending</div>
+      <div class="stat-pill stat-approved"><span id="stat-flagged">…</span> Flagged</div>
+      <div class="stat-pill"><span id="stat-users">…</span> Users</div>
+      <div class="stat-pill stat-approved"><span id="stat-sos">…</span> SOS Today</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="filter-tabs" role="tablist" aria-label="Admin sections">
+      <button class="filter-tab active" role="tab" aria-selected="true"  data-tab="pending">Pending</button>
+      <button class="filter-tab"        role="tab" aria-selected="false" data-tab="flagged">Flagged</button>
+      <button class="filter-tab"        role="tab" aria-selected="false" data-tab="all">All Reports</button>
+      <button class="filter-tab"        role="tab" aria-selected="false" data-tab="users">Users</button>
+      <button class="filter-tab"        role="tab" aria-selected="false" data-tab="sos">SOS Events</button>
+    </div>
+
+    <!-- ── PENDING REPORTS TAB ─────────────────────────────────── -->
+    <div id="tab-pending" class="admin-tab-panel">
+      <h2 class="admin-section-title">Pending Reports</h2>
+      <p style="font-size:0.88rem;color:#666;margin-bottom:16px;">Review and approve or reject community-submitted reports before they go public.</p>
+      <div id="pending-list" aria-live="polite"></div>
+    </div>
+
+    <!-- ── FLAGGED REPORTS TAB ─────────────────────────────────── -->
+    <div id="tab-flagged" class="admin-tab-panel" style="display:none;">
+      <h2 class="admin-section-title">Flagged Reports</h2>
+      <p style="font-size:0.88rem;color:#666;margin-bottom:16px;">Reports that community members have flagged for review.</p>
+      <div id="flagged-list" aria-live="polite"></div>
+    </div>
+
+    <!-- ── ALL REPORTS TAB ────────────────────────────────────────────── -->
+    <div id="tab-all" class="admin-tab-panel" style="display:none;">
+      <h2 class="admin-section-title">All Reports</h2>
+      <div id="all-reports-list" aria-live="polite"></div>
+    </div>
+
+    <!-- ── USERS TAB ──────────────────────────────────────────────────── -->
+    <div id="tab-users" class="admin-tab-panel" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <h2 class="admin-section-title" style="margin:0;">Registered Users</h2>
+        <button id="btn-export-csv" class="btn btn-secondary" style="padding:8px 16px;font-size:0.88rem;">
+          ⬇ Export CSV
+        </button>
+      </div>
+      <div class="admin-table-wrap" role="region" aria-label="Users table" tabindex="0">
+        <table class="admin-table" id="users-table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Joined</th>
+              <th scope="col">Role</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── SOS EVENTS TAB ─────────────────────────────────────────────── -->
+    <div id="tab-sos" class="admin-tab-panel" style="display:none;">
+      <h2 class="admin-section-title">SOS Events</h2>
+      <p style="font-size:0.88rem;color:#666;margin-bottom:16px;">Recent SOS events. This data is private and visible only to admins.</p>
+      <div class="admin-table-wrap" role="region" aria-label="SOS events table" tabindex="0">
+        <table class="admin-table" id="sos-table">
+          <thead>
+            <tr>
+              <th scope="col">User (UID)</th>
+              <th scope="col">Latitude</th>
+              <th scope="col">Longitude</th>
+              <th scope="col">Time</th>
+              <th scope="col">Resolved</th>
+            </tr>
+          </thead>
+          <tbody id="sos-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /admin-content -->
+</main>
+
+<script type="module">
+  import { onAuthChange, isAdmin, signOutUser } from '/js/auth.js';
+  import { db, auth }   from '/js/firebase-config.js';
+  import {
+    collection,
+    query,
+    where,
+    orderBy,
+    limit,
+    getDocs,
+    updateDoc,
+    deleteDoc,
+    doc,
+    writeBatch,
+    Timestamp,
+  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { sanitizeText, formatTimeAgo, formatDate, getCategoryLabel, getCategoryIcon, showToast } from '/js/utils.js';
+
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  const authLoading   = document.getElementById('auth-loading');
+  const accessDenied  = document.getElementById('access-denied');
+  const adminContent  = document.getElementById('admin-content');
+
+  // ── Auth & admin check ────────────────────────────────────────────────────
+  onAuthChange(async (user) => {
+    if (!user) {
+      authLoading.style.display = 'none';
+      accessDenied.style.display = 'block';
+      return;
+    }
+    const admin = await isAdmin();
+    authLoading.style.display = 'none';
+    if (!admin) {
+      accessDenied.style.display = 'block';
+      return;
+    }
+    adminContent.style.display = 'block';
+    await loadAll();
+  });
+
+  // ── Sign out ──────────────────────────────────────────────────────────────
+  document.getElementById('btn-signout').addEventListener('click', async () => {
+    await signOutUser();
+    window.location.href = '/login.html';
+  });
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  document.querySelectorAll('.filter-tab[data-tab]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab[data-tab]').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.admin-tab-panel').forEach(p => p.style.display = 'none');
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      const panel = document.getElementById('tab-' + tab.dataset.tab);
+      if (panel) panel.style.display = 'block';
+    });
+  });
+
+  // ── Load everything ───────────────────────────────────────────────────────
+  async function loadAll() {
+    await Promise.all([
+      loadPendingReports(),
+      loadFlaggedReports(),
+      loadAllReports(),
+      loadUsers(),
+      loadSosEvents(),
+      loadStats(),
+    ]);
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const [pendingSnap, flaggedSnap, usersSnap] = await Promise.all([
+        getDocs(query(collection(db, 'reports'), where('status', '==', 'pending'))),
+        getDocs(query(collection(db, 'reports'), where('flagged', '==', true))),
+        getDocs(collection(db, 'users')),
+      ]);
+      document.getElementById('stat-pending').textContent = pendingSnap.size;
+      document.getElementById('stat-flagged').textContent = flaggedSnap.size;
+      document.getElementById('stat-users').textContent   = usersSnap.size;
+
+      // SOS events today
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const sosSnap = await getDocs(
+        query(collection(db, 'sos_events'), where('timestamp', '>=', Timestamp.fromDate(startOfDay)))
+      );
+      document.getElementById('stat-sos').textContent = sosSnap.size;
+    } catch (e) {
+      console.error('Stats error:', e);
+    }
+  }
+
+  // ── Report action buttons ─────────────────────────────────────────────────
+  function reportActionHTML(reportId, currentStatus) {
+    const approveBtn = currentStatus !== 'approved'
+      ? `<button class="btn btn-green admin-action-btn" data-action="approve" data-id="${reportId}" style="font-size:0.8rem;padding:5px 10px;">✓ Approve</button>`
+      : '';
+    const rejectBtn = currentStatus !== 'rejected'
+      ? `<button class="btn btn-danger admin-action-btn" data-action="reject" data-id="${reportId}" style="font-size:0.8rem;padding:5px 10px;">✗ Reject</button>`
+      : '';
+    const deleteBtn = `<button class="btn btn-secondary admin-action-btn" data-action="delete" data-id="${reportId}" style="font-size:0.8rem;padding:5px 10px;">🗑</button>`;
+    return `<div style="display:flex;gap:6px;flex-wrap:wrap;">${approveBtn}${rejectBtn}${deleteBtn}</div>`;
+  }
+
+  async function handleReportAction(action, reportId) {
+    try {
+      if (action === 'approve') {
+        await updateDoc(doc(db, 'reports', reportId), { status: 'approved' });
+        showToast('Report approved ✓', 'success');
+      } else if (action === 'reject') {
+        await updateDoc(doc(db, 'reports', reportId), { status: 'rejected' });
+        showToast('Report rejected.', 'info');
+      } else if (action === 'delete') {
+        if (!confirm('Permanently delete this report?')) return;
+        const batch = writeBatch(db);
+        batch.delete(doc(db, 'reports', reportId));
+        batch.delete(doc(db, 'report_authors', reportId));
+        await batch.commit();
+        showToast('Report deleted.', 'success');
+      }
+      await loadAll();
+    } catch (e) {
+      console.error(e);
+      showToast('Action failed: ' + e.message, 'error');
+    }
+  }
+
+  function wireActionBtns(container) {
+    container.querySelectorAll('.admin-action-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleReportAction(btn.dataset.action, btn.dataset.id));
+    });
+  }
+
+  function buildReportRow(r) {
+    const icon  = getCategoryIcon(r.category);
+    const label = getCategoryLabel(r.category);
+    const desc  = sanitizeText((r.description || '').slice(0, 80));
+    const statusClass = r.status === 'approved' ? 'badge-approved'
+                      : r.status === 'rejected' ? 'badge-rejected'
+                      : 'badge-pending';
+    return `
+      <tr>
+        <td><span class="badge badge-${r.category}" style="font-size:0.78rem;">${icon} ${label}</span></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc}">${desc}…</td>
+        <td style="font-size:0.8rem;color:#666;">${r.lat?.toFixed(4)}, ${r.lng?.toFixed(4)}</td>
+        <td><span class="badge ${statusClass}" style="font-size:0.75rem;">${r.status}</span></td>
+        <td style="font-size:0.8rem;color:#666;">${formatTimeAgo(r.createdAt)}</td>
+        <td>${reportActionHTML(r.id, r.status)}</td>
+      </tr>
+    `;
+  }
+
+  // ── Pending ───────────────────────────────────────────────────────────────
+  async function loadPendingReports() {
+    const container = document.getElementById('pending-list');
+    container.innerHTML = '<div class="spinner" style="margin:24px auto;" role="status"></div>';
+    try {
+      const snap = await getDocs(query(collection(db, 'reports'), where('status', '==', 'pending'), orderBy('createdAt', 'desc')));
+      if (snap.empty) {
+        container.innerHTML = '<p class="empty-hint">No pending reports. 🎉</p>';
+        return;
+      }
+      const rows = snap.docs.map(d => buildReportRow({ id: d.id, ...d.data() })).join('');
+      container.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Category</th><th>Description</th><th>Location</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      wireActionBtns(container);
+    } catch (e) {
+      container.innerHTML = `<p class="danger-text">Error: ${e.message}</p>`;
+    }
+  }
+
+  // ── Flagged ───────────────────────────────────────────────────────────────
+  async function loadFlaggedReports() {
+    const container = document.getElementById('flagged-list');
+    container.innerHTML = '<div class="spinner" style="margin:24px auto;" role="status"></div>';
+    try {
+      const snap = await getDocs(query(collection(db, 'reports'), where('flagged', '==', true), orderBy('createdAt', 'desc')));
+      if (snap.empty) {
+        container.innerHTML = '<p class="empty-hint">No flagged reports.</p>';
+        return;
+      }
+      const rows = snap.docs.map(d => buildReportRow({ id: d.id, ...d.data() })).join('');
+      container.innerHTML = `<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Category</th><th>Description</th><th>Location</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      wireActionBtns(container);
+    } catch (e) {
+      container.innerHTML = `<p class="danger-text">Error: ${e.message}</p>`;
+    }
+  }
+
+  // ── All Reports ───────────────────────────────────────────────────────────
+  async function loadAllReports() {
+    const container = document.getElementById('all-reports-list');
+    container.innerHTML = '<div class="spinner" style="margin:24px auto;" role="status"></div>';
+    try {
+      const snap = await getDocs(query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(100)));
+      if (snap.empty) {
+        container.innerHTML = '<p class="empty-hint">No reports yet.</p>';
+        return;
+      }
+      const rows = snap.docs.map(d => buildReportRow({ id: d.id, ...d.data() })).join('');
+      container.innerHTML = `<p style="font-size:0.82rem;color:#888;margin-bottom:8px;">Showing latest 100 reports.</p><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Category</th><th>Description</th><th>Location</th><th>Status</th><th>Time</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      wireActionBtns(container);
+    } catch (e) {
+      container.innerHTML = `<p class="danger-text">Error: ${e.message}</p>`;
+    }
+  }
+
+  // ── Users ─────────────────────────────────────────────────────────────────
+  let usersData = [];
+
+  async function loadUsers() {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;"><div class="spinner" style="margin:0 auto;" role="status"></div></td></tr>';
+    try {
+      const snap = await getDocs(query(collection(db, 'users'), orderBy('joinedAt', 'desc'), limit(500)));
+      usersData = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+      if (usersData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:16px;color:#888;">No users yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = usersData.map(u => `
+        <tr>
+          <td>${sanitizeText(u.name || '—')}</td>
+          <td>${sanitizeText(u.email || '—')}</td>
+          <td style="font-size:0.82rem;">${formatDate(u.joinedAt)}</td>
+          <td><span class="badge ${u.role === 'admin' ? 'badge-approved' : 'badge-pending'}" style="font-size:0.75rem;">${sanitizeText(u.role || 'user')}</span></td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="4" class="danger-text">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  // ── CSV Export ────────────────────────────────────────────────────────────
+  document.getElementById('btn-export-csv').addEventListener('click', () => {
+    if (!usersData.length) {
+      showToast('No user data to export yet.', 'error');
+      return;
+    }
+    const header = ['Name', 'Email', 'Joined', 'Role'];
+    const rows   = usersData.map(u => [
+      `"${(u.name  || '').replace(/"/g, '""')}"`,
+      `"${(u.email || '').replace(/"/g, '""')}"`,
+      `"${formatDate(u.joinedAt)}"`,
+      `"${u.role || 'user'}"`,
+    ].join(','));
+    const csv  = [header.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `jonaki-pothe-users-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('CSV downloaded!', 'success');
+  });
+
+  // ── SOS Events ───────────────────────────────────────────────────────────
+  async function loadSosEvents() {
+    const tbody = document.getElementById('sos-tbody');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;"><div class="spinner" style="margin:0 auto;" role="status"></div></td></tr>';
+    try {
+      const snap = await getDocs(query(collection(db, 'sos_events'), orderBy('timestamp', 'desc'), limit(100)));
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:#888;">No SOS events recorded.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = snap.docs.map(d => {
+        const ev = d.data();
+        return `
+          <tr>
+            <td style="font-family:monospace;font-size:0.78rem;">${sanitizeText((ev.uid || '').slice(0, 12))}…</td>
+            <td>${(ev.lat || 0).toFixed(5)}</td>
+            <td>${(ev.lng || 0).toFixed(5)}</td>
+            <td style="font-size:0.82rem;">${formatDate(ev.timestamp)}</td>
+            <td><span class="badge ${ev.resolved ? 'badge-approved' : 'badge-pending'}" style="font-size:0.75rem;">${ev.resolved ? 'Yes' : 'No'}</span></td>
+          </tr>
+        `;
+      }).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="5" class="danger-text">Error: ${e.message}</td></tr>`;
+    }
+  }
+</script>
+
+</body>
+</html>

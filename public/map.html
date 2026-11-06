@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <title>Map — Jonaki Pothe</title>
+  <meta name="description" content="Community safety map for Siliguri. View hazard reports and safe spots." />
+  <meta name="theme-color" content="#14213D" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/map.css" />
+</head>
+<body class="map-page">
+
+<!-- ══ MAP (full screen, z-index 0) ═══════════════════════════════════════ -->
+<div id="map" aria-label="Safety map of Siliguri" role="application"></div>
+
+<!-- ══ MAP HEADER OVERLAY ═════════════════════════════════════════════════ -->
+<header class="map-header" role="banner">
+  <a href="/" class="map-back-btn" aria-label="Back to home">←</a>
+  <div class="map-brand">
+    <img src="/assets/logo.svg" alt="" width="32" height="16" aria-hidden="true" />
+    <span>Jonaki Pothe</span>
+  </div>
+  <div class="auth-indicator" aria-live="polite">
+    <span class="auth-dot" aria-hidden="true"></span>
+    <span class="auth-label">Loading…</span>
+  </div>
+  <a href="/login.html" class="btn btn-ghost header-login-btn" style="display:none;padding:6px 14px;font-size:0.82rem;">Sign in</a>
+</header>
+
+<!-- ══ FILTER BAR ══════════════════════════════════════════════════════════ -->
+<div class="filter-bar" role="toolbar" aria-label="Filter reports">
+  <!-- Category filters -->
+  <button class="filter-chip active" data-category="all">All</button>
+  <button class="filter-chip" data-category="dark_street">🌑 Dark Street</button>
+  <button class="filter-chip" data-category="stray_dogs">🐕 Stray Dogs</button>
+  <button class="filter-chip" data-category="waterlogging">💧 Water</button>
+  <button class="filter-chip" data-category="isolated_area">⚠️ Isolated</button>
+  <button class="filter-chip" data-category="broken_road">🚧 Broken Road</button>
+  <button class="filter-chip" data-category="safe_spot">✅ Safe Spot</button>
+  <!-- Divider -->
+  <div class="filter-divider" aria-hidden="true">|</div>
+  <!-- Time filters -->
+  <button class="filter-chip active" data-time="all">🕐 All Times</button>
+  <button class="filter-chip" data-time="day">☀️ Day</button>
+  <button class="filter-chip" data-time="night">🌙 Night</button>
+</div>
+
+<!-- ══ FLOATING CONTROLS (right side) ════════════════════════════════════= -->
+<div class="map-controls" role="group" aria-label="Map controls">
+  <button id="btn-my-location" class="map-ctrl-btn" aria-label="Use my location" title="Use my location">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" opacity=".25"/></svg>
+  </button>
+  <button id="btn-zoom-in" class="map-ctrl-btn" aria-label="Zoom in" title="Zoom in">+</button>
+  <button id="btn-zoom-out" class="map-ctrl-btn" aria-label="Zoom out" title="Zoom out">−</button>
+</div>
+
+<!-- ══ LEGEND ══════════════════════════════════════════════════════════════ -->
+<div id="legend-box" class="legend-box" role="note" aria-label="Map legend">
+  <button class="legend-toggle-btn" aria-label="Toggle legend" aria-expanded="true">
+    <span class="legend-label">Legend</span>
+    <span class="legend-arrow" aria-hidden="true">▲</span>
+  </button>
+  <div id="legend-content" class="legend-content"></div>
+</div>
+
+<!-- ══ ADD REPORT FAB ══════════════════════════════════════════════════════ -->
+<button class="add-report-fab" aria-label="Add a safety report" title="Report a hazard">
+  <span aria-hidden="true">+</span>
+</button>
+
+<!-- ══ SOS BUTTON (logged-in users only) ══════════════════════════════════ -->
+<button class="sos-fab hidden" id="sos-btn" aria-label="SOS — Emergency help" title="SOS">
+  SOS
+</button>
+
+<!-- ══ PIN INSTRUCTION OVERLAY ════════════════════════════════════════════ -->
+<div id="pin-instruction" class="pin-instruction" aria-live="assertive" role="status">
+  <div class="pin-instruction-box">
+    <p>📍 Tap the map to drop your pin</p>
+    <button id="pin-cancel-btn" class="btn btn-ghost" style="margin-top:8px;font-size:0.85rem;">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ REPORT MODAL (slide-up bottom sheet) ════════════════════════════════ -->
+<div class="report-modal-backdrop" role="presentation"></div>
+<div id="report-modal" class="report-modal" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+  <div class="report-modal-drag" aria-hidden="true"></div>
+
+  <!-- Modal header -->
+  <div class="report-modal-header">
+    <div class="report-steps-indicator" aria-label="Steps">
+      <div class="report-step" aria-current="step"><span>1</span> Location</div>
+      <div class="report-step-line" aria-hidden="true"></div>
+      <div class="report-step"><span>2</span> Details</div>
+    </div>
+    <button class="modal-close-btn" aria-label="Close report form">✕</button>
+  </div>
+
+  <div class="report-modal-body">
+
+    <!-- ── STEP 1: LOCATION ───────────────────────────────────── -->
+    <div id="step-panel-1" class="step-panel active">
+      <h2 id="report-modal-title" class="report-modal-title">Where is the hazard?</h2>
+      <p class="report-modal-hint">Choose how you want to place the location pin.</p>
+
+      <div class="location-method-btns">
+        <button id="btn-tap-map" class="btn btn-secondary location-method-btn">
+          <span aria-hidden="true">👆</span>
+          Tap the map to drop a pin
+        </button>
+        <button id="btn-use-my-location-pin" class="btn btn-secondary location-method-btn">
+          <span aria-hidden="true">📍</span>
+          Use my current location
+        </button>
+      </div>
+
+      <div id="pin-placed-info" class="pin-placed-info" aria-live="polite"></div>
+
+      <button id="btn-next-step" class="btn btn-primary btn-next-step">
+        Next: Add details →
+      </button>
+    </div>
+
+    <!-- ── STEP 2: REPORT DETAILS ─────────────────────────────── -->
+    <div id="step-panel-2" class="step-panel">
+      <h2 class="report-modal-title">Describe the hazard</h2>
+
+      <!-- Community guideline -->
+      <div class="report-guideline" role="note">
+        <strong>📋 Community rule:</strong> Describe places and conditions — never name, describe, or single out individuals or communities.
+      </div>
+
+      <form id="report-form" novalidate>
+        <!-- Category -->
+        <div class="form-group">
+          <label class="form-label" for="report-category">Category <span aria-hidden="true">*</span></label>
+          <select id="report-category" class="form-select" required aria-required="true">
+            <option value="">— Select a category —</option>
+            <option value="dark_street">🌑 Dark Street</option>
+            <option value="stray_dogs">🐕 Stray Dogs</option>
+            <option value="waterlogging">💧 Waterlogging</option>
+            <option value="isolated_area">⚠️ Isolated Area</option>
+            <option value="broken_road">🚧 Broken Road</option>
+            <option value="safe_spot">✅ Safe Spot / Good lighting</option>
+          </select>
+          <div id="error-category" class="field-error" role="alert"></div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label" for="report-description">
+            Description <span aria-hidden="true">*</span>
+            <span class="char-counter" id="desc-char-counter" aria-live="polite">0 / 500</span>
+          </label>
+          <textarea
+            id="report-description"
+            class="form-textarea"
+            rows="4"
+            placeholder="e.g. The streetlights near Pradhan Nagar crossing are broken. Very dark after 8 PM."
+            minlength="10"
+            maxlength="500"
+            required
+            aria-required="true"
+            aria-describedby="desc-char-counter error-description"
+          ></textarea>
+          <div id="error-description" class="field-error" role="alert"></div>
+        </div>
+
+        <!-- Time of Day -->
+        <div class="form-group">
+          <fieldset>
+            <legend class="form-label">Time of day <span aria-hidden="true">*</span></legend>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="timeOfDay" value="day" required /> ☀️ Day
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="timeOfDay" value="night" /> 🌙 Night
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="timeOfDay" value="both" /> 🕐 Both
+              </label>
+            </div>
+            <div id="error-timeofday" class="field-error" role="alert"></div>
+          </fieldset>
+        </div>
+
+        <!-- Severity -->
+        <div class="form-group">
+          <fieldset>
+            <legend class="form-label">Severity <span aria-hidden="true">*</span></legend>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="severity" value="low" required /> 🟢 Low
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="severity" value="medium" /> 🟡 Medium
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="severity" value="high" /> 🔴 High
+              </label>
+            </div>
+            <div id="error-severity" class="field-error" role="alert"></div>
+          </fieldset>
+        </div>
+
+        <!-- Anonymous toggle -->
+        <div class="form-group toggle-row">
+          <label class="toggle-label" for="report-anonymous">
+            <span>Post anonymously</span>
+            <span class="toggle-hint">Your name won't appear on the report</span>
+          </label>
+          <label class="toggle-switch" aria-label="Post anonymously">
+            <input type="checkbox" id="report-anonymous" role="switch" />
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary btn-cancel-modal">Cancel</button>
+          <button type="button" id="btn-submit-report" class="btn btn-primary">
+            Submit Report
+          </button>
+        </div>
+      </form>
+    </div><!-- /step-panel-2 -->
+
+  </div><!-- /report-modal-body -->
+</div><!-- /report-modal -->
+
+<!-- ══ SOS COUNTDOWN OVERLAY ══════════════════════════════════════════════ -->
+<!-- Injected by sos.js at runtime -->
+
+<!-- ══ Leaflet JS (non-module, must come BEFORE the module script) ════════ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- ══ Main map module ════════════════════════════════════════════════════ -->
+<script type="module" src="/js/map.js"></script>
+
+</body>
+</html>

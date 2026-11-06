@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <title>404 — Path Not Found | Jonaki Pothe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0d1b2a;
+      color: #f5e642;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .firefly {
+      font-size: 5rem;
+      animation: glow 2.4s ease-in-out infinite alternate;
+      display: block;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 6px #f5e642aa); opacity: 0.7; }
+      to   { filter: drop-shadow(0 0 24px #f5e642ff); opacity: 1;   }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.75rem;
+      color: #f5e642;
+    }
+
+    p {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 400;
+      color: #c8d8e8;
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .nav-links a {
+      display: inline-block;
+      padding: 0.65rem 1.6rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+
+    .nav-links a.primary {
+      background: #f5e642;
+      color: #0d1b2a;
+    }
+
+    .nav-links a.primary:hover {
+      background: #ffe900;
+      transform: translateY(-2px);
+    }
+
+    .nav-links a.secondary {
+      background: transparent;
+      color: #f5e642;
+      border: 2px solid #f5e642;
+    }
+
+    .nav-links a.secondary:hover {
+      background: rgba(245, 230, 66, 0.12);
+      transform: translateY(-2px);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 1.5rem;
+      font-size: 0.78rem;
+      color: #3d5166;
+    }
+  </style>
+</head>
+<body>
+  <span class="firefly" role="img" aria-label="firefly">🌟</span>
+  <h1>404 — Path Not Found</h1>
+  <p>This path is dark. Let's go back to safer ground.</p>
+  <nav class="nav-links" aria-label="Navigation">
+    <a href="/index.html" class="primary">🏠 Go Home</a>
+    <a href="/map.html"   class="secondary">🗺️ View Map</a>
+  </nav>
+  <footer>Jonaki Pothe &mdash; Safety Reporting for Every Street</footer>
+</body>
+</html>

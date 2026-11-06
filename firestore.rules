@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper functions ────────────────────────────────────────────────────
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && request.auth.token.admin == true; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isPending() { return request.resource.data.status == 'pending'; }
+    function validReportFields() {
+      return request.resource.data.keys().hasAll([
+          'category', 'description', 'timeOfDay', 'severity',
+          'lat', 'lng', 'status', 'createdAt',
+          'confirmationsCount', 'anonymous', 'flagged'
+        ])
+        && request.resource.data.description is string
+        && request.resource.data.description.size() >= 10
+        && request.resource.data.description.size() <= 500
+        && request.resource.data.category in [
+            'dark_street', 'stray_dogs', 'waterlogging',
+            'isolated_area', 'broken_road', 'safe_spot'
+           ]
+        && request.resource.data.timeOfDay in ['day', 'night', 'both']
+        && request.resource.data.severity in ['low', 'medium', 'high']
+        && request.resource.data.confirmationsCount == 0
+        && request.resource.data.flagged == false
+        && request.resource.data.lat is number
+        && request.resource.data.lng is number
+        && request.resource.data.anonymous is bool;
+    }
+
+    // ─── Reports ─────────────────────────────────────────────────────────────
+    // Publicly readable if approved; created by signed-in users (pending only).
+    // Only admins may update status or delete.
+    match /reports/{reportId} {
+      allow read:   if resource.data.status == 'approved' || isAdmin();
+      allow create: if isSignedIn() && isPending() && validReportFields();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+
+      // Confirmations — each user can confirm once
+      match /confirmations/{uid} {
+        allow read:   if isSignedIn();
+        allow create: if isOwner(uid)
+                      && !exists(/databases/$(database)/documents/reports/$(reportId)/confirmations/$(uid));
+        allow delete: if isOwner(uid) || isAdmin();
+      }
+
+      // Flags — each user can flag once; only admins can read
+      match /flags/{uid} {
+        allow read:   if isAdmin();
+        allow create: if isOwner(uid)
+                      && !exists(/databases/$(database)/documents/reports/$(reportId)/flags/$(uid));
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ─── Report authors ───────────────────────────────────────────────────────
+    // Private mapping of reportId → uid. Owner and admins only.
+    match /report_authors/{reportId} {
+      // Admins can do anything; owner can read their own record.
+      allow read:   if isAdmin()
+                    || (isSignedIn() && resource.data.uid == request.auth.uid);
+      // Owner can create their own record (uid must match).
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid;
+      // Only admins can update or delete.
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── Users ────────────────────────────────────────────────────────────────
+    // Owner reads/writes their own document; admins can read all.
+    // Role field is immutable after creation.
+    match /users/{uid} {
+      allow read:   if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && request.resource.data.role == 'user';
+      allow update: if isOwner(uid)
+                    && !('role' in request.resource.data.diff(resource.data).affectedKeys());
+      allow delete: if isAdmin();
+
+      // Emergency contacts — only the user themselves
+      match /contacts/{contactId} {
+        allow read, write: if isOwner(uid);
+        allow delete:      if isOwner(uid) || isAdmin();
+      }
+    }
+
+    // ─── SOS events ───────────────────────────────────────────────────────────
+    // Owner and admins only. Admins can update/delete; owner can create.
+    match /sos_events/{eventId} {
+      allow read:   if isAdmin()
+                    || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Safe spots ───────────────────────────────────────────────────────────
+    // Publicly readable; only admins may write.
+    match /safe_spots/{spotId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Catch-all deny ───────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
