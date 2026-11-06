@@ -91,7 +91,7 @@ function _buildSOSActionScreen(lat, lng, contacts, locationFailed) {
         id="sos-manual-loc-input"
         type="text"
         class="input"
-        placeholder="e.g. Near Siliguri Junction, platform 2"
+        placeholder="e.g. Near Central Park, main gate"
         aria-label="Your current location"
       />
     </div>`
